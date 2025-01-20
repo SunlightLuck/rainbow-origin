@@ -1,190 +1,310 @@
-![cover-v5-optimized](https://github.com/langgenius/dify/assets/13230914/f9e19af5-61ba-4119-b926-d10c4c06ebab)
+We want to integrate RainbowKit in Difi as alternative auth. 
 
-<p align="center">
-  📌 <a href="https://dify.ai/blog/introducing-dify-workflow-file-upload-a-demo-on-ai-podcast">Introducing Dify Workflow File Upload: Recreate Google NotebookLM Podcast</a>
-</p>
+Start the dify project locally from https://github.com/langgenius/dify
 
-<p align="center">
-  <a href="https://cloud.dify.ai">Dify Cloud</a> ·
-  <a href="https://docs.dify.ai/getting-started/install-self-hosted">Self-hosting</a> ·
-  <a href="https://docs.dify.ai">Documentation</a> ·
-  <a href="https://udify.app/chat/22L1zSxg6yW1cWQg">Enterprise inquiry</a>
-</p>
+To add RainbowKit as an additional Web3 authentication option, we need to make several technical updates in the project. Below is a detailed step-by-step guide for the developer, including the changes required and where to make them.
 
-<p align="center">
-    <a href="https://dify.ai" target="_blank">
-        <img alt="Static Badge" src="https://img.shields.io/badge/Product-F04438"></a>
-    <a href="https://dify.ai/pricing" target="_blank">
-        <img alt="Static Badge" src="https://img.shields.io/badge/free-pricing?logo=free&color=%20%23155EEF&label=pricing&labelColor=%20%23528bff"></a>
-    <a href="https://discord.gg/FngNHpbcY7" target="_blank">
-        <img src="https://img.shields.io/discord/1082486657678311454?logo=discord&labelColor=%20%235462eb&logoColor=%20%23f5f5f5&color=%20%235462eb"
-            alt="chat on Discord"></a>
-    <a href="https://reddit.com/r/difyai" target="_blank">  
-        <img src="https://img.shields.io/reddit/subreddit-subscribers/difyai?style=plastic&logo=reddit&label=r%2Fdifyai&labelColor=white"
-            alt="join Reddit"></a>
-    <a href="https://twitter.com/intent/follow?screen_name=dify_ai" target="_blank">
-        <img src="https://img.shields.io/twitter/follow/dify_ai?logo=X&color=%20%23f5f5f5"
-            alt="follow on X(Twitter)"></a>
-    <a href="https://hub.docker.com/u/langgenius" target="_blank">
-        <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/langgenius/dify-web?labelColor=%20%23FDB062&color=%20%23f79009"></a>
-    <a href="https://github.com/langgenius/dify/graphs/commit-activity" target="_blank">
-        <img alt="Commits last month" src="https://img.shields.io/github/commit-activity/m/langgenius/dify?labelColor=%20%2332b583&color=%20%2312b76a"></a>
-    <a href="https://github.com/langgenius/dify/" target="_blank">
-        <img alt="Issues closed" src="https://img.shields.io/github/issues-search?query=repo%3Alanggenius%2Fdify%20is%3Aclosed&label=issues%20closed&labelColor=%20%237d89b0&color=%20%235d6b98"></a>
-    <a href="https://github.com/langgenius/dify/discussions/" target="_blank">
-        <img alt="Discussion posts" src="https://img.shields.io/github/discussions/langgenius/dify?labelColor=%20%239b8afb&color=%20%237a5af8"></a>
-</p>
+---
 
-<p align="center">
-  <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
-  <a href="./README_CN.md"><img alt="简体中文版自述文件" src="https://img.shields.io/badge/简体中文-d9d9d9"></a>
-  <a href="./README_JA.md"><img alt="日本語のREADME" src="https://img.shields.io/badge/日本語-d9d9d9"></a>
-  <a href="./README_ES.md"><img alt="README en Español" src="https://img.shields.io/badge/Español-d9d9d9"></a>
-  <a href="./README_FR.md"><img alt="README en Français" src="https://img.shields.io/badge/Français-d9d9d9"></a>
-  <a href="./README_KL.md"><img alt="README tlhIngan Hol" src="https://img.shields.io/badge/Klingon-d9d9d9"></a>
-  <a href="./README_KR.md"><img alt="README in Korean" src="https://img.shields.io/badge/한국어-d9d9d9"></a>
-  <a href="./README_AR.md"><img alt="README بالعربية" src="https://img.shields.io/badge/العربية-d9d9d9"></a>
-  <a href="./README_TR.md"><img alt="Türkçe README" src="https://img.shields.io/badge/Türkçe-d9d9d9"></a>
-  <a href="./README_VI.md"><img alt="README Tiếng Việt" src="https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-d9d9d9"></a>
-</p>
+### **Technical Requirements for Adding RainbowKit Web3 Auth**
 
+#### **1. Install RainbowKit and Dependencies**
+1. **Packages to Install**:
+   Use npm or yarn to install RainbowKit and its dependencies:
+   ```bash
+   npm install @rainbow-me/rainbowkit wagmi ethers
+   ```
+   OR
+   ```bash
+   yarn add @rainbow-me/rainbowkit wagmi ethers
+   ```
 
-Dify is an open-source LLM app development platform. Its intuitive interface combines agentic AI workflow, RAG pipeline, agent capabilities, model management, observability features and more, letting you quickly go from prototype to production. 
+#### **2. Initialize RainbowKit in the Application**
+   - **File to Update**: Create or update a configuration file for RainbowKit, for example: `web/context/web3-auth-context.tsx`.
 
-## Quick start
-> Before installing Dify, make sure your machine meets the following minimum system requirements:
-> 
->- CPU >= 2 Core
->- RAM >= 4 GiB
+   - **Code Snippet**:
+     ```tsx
+     import '@rainbow-me/rainbowkit/styles.css';
+     import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+     import { configureChains, createClient, WagmiConfig } from 'wagmi';
+     import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
+     import { publicProvider } from 'wagmi/providers/public';
 
-</br>
+     const { chains, provider } = configureChains(
+       [mainnet, polygon, optimism, arbitrum],
+       [publicProvider()]
+     );
 
-The easiest way to start the Dify server is through [docker compose](docker/docker-compose.yaml). Before running Dify with the following commands, make sure that [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your machine:
+     const { connectors } = getDefaultWallets({
+       appName: 'YourAppName',
+       chains,
+     });
 
-```bash
-cd dify
-cd docker
-cp .env.example .env
-docker compose up -d
+     const wagmiClient = createClient({
+       autoConnect: true,
+       connectors,
+       provider,
+     });
+
+     const Web3AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+       return (
+         <WagmiConfig client={wagmiClient}>
+           <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
+         </WagmiConfig>
+       );
+     };
+
+     export default Web3AuthProvider;
+     ```
+
+#### **3. Integrate RainbowKit with the App**
+   - **File to Update**: Update the root component (e.g., `web/app/layout.tsx`) to wrap the app with the `Web3AuthProvider`.
+
+   - **Code Snippet**:
+     ```tsx
+     import Web3AuthProvider from '../context/web3-auth-context';
+     const MyApp = ({ Component, pageProps }: any) => {
+       return (
+         <Web3AuthProvider>
+           <Component {...pageProps} />
+         </Web3AuthProvider>
+       );
+     };
+     export default MyApp;
+     ```
+
+#### **4. Add Connect Button to the App**
+   - **File to Update**: Update or create a component for connecting the wallet, such as `web/components/ConnectButton.tsx`.
+
+   - **Code Snippet**:
+     ```tsx
+     import { ConnectButton } from '@rainbow-me/rainbowkit';
+     const WalletConnect = () => {
+       return (
+         <div>
+           <ConnectButton />
+         </div>
+       );
+     };
+     export default WalletConnect;
+     ```
+
+   - Add this button where authentication options are displayed.
+
+#### **5. Update Routes for Authenticated Users**
+   - If the app has routes or features restricted to authenticated users, ensure Web3 authentication is verified after successful wallet connection.
+
+   - Example: In `web/middleware.ts`, check for wallet connection or session data before granting access:
+     ```ts
+     import { NextResponse } from 'next/server';
+     import type { NextRequest } from 'next/server';
+     export function middleware(req: NextRequest) {
+       const walletConnected = req.cookies.get('walletConnected');
+       if (!walletConnected) {
+         return NextResponse.redirect(new URL('/webapp-signin', req.url));
+       }
+       return NextResponse.next();
+     }
+     ```
+
+#### **6. Update Environment Variables (if needed)**
+   - If using private providers like Infura or Alchemy, add the required API keys to `.env`:
+     ```env
+     NEXT_PUBLIC_INFURA_PROJECT_ID=<your-infura-project-id>
+     NEXT_PUBLIC_ALCHEMY_API_KEY=<your-alchemy-api-key>
+     ```
+
+   - Update `provider` configuration in `web/context/web3-auth-context.tsx`:
+     ```tsx
+     import { infuraProvider } from 'wagmi/providers/infura';
+     const { chains, provider } = configureChains(
+       [mainnet, polygon, optimism, arbitrum],
+       [infuraProvider({ apiKey: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })]
+     );
+     ```
+
+#### **7. Add TypeScript Support**
+   - **File to Update**: Update `tsconfig.json` to include RainbowKit types:
+     ```json
+     {
+       "compilerOptions": {
+         "types": ["@rainbow-me/rainbowkit"]
+       }
+     }
+     ```
+
+#### **8. Customize RainbowKit Theme (Optional)**
+   - Customize the appearance of RainbowKit to match the app's theme in `web/context/web3-auth-context.tsx`:
+     ```tsx
+     import { darkTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+     <RainbowKitProvider chains={chains} theme={darkTheme()}>
+       {children}
+     </RainbowKitProvider>
+     ```
+
+---
+
+### **Files to Update**
+1. `web/context/web3-auth-context.tsx`: Add RainbowKit configuration and provider.
+2. `web/app/layout.tsx`: Wrap the app with `Web3AuthProvider`.
+3. `web/components/ConnectButton.tsx`: Add the wallet connection UI.
+4. `web/middleware.ts`: Optionally handle routing for wallet-connected users.
+
+### **Outcome**
+Once implemented:
+- Users will see a "Connect Wallet" button powered by RainbowKit.
+- After connecting a wallet, users will be authenticated, enabling Web3 features in the app.
+
+To enable Web3 authentication with RainbowKit, you need to enhance your server-side API to handle wallet-based authentication securely. This involves:
+
+1. **Generating a Message for the User to Sign**.
+2. **Verifying the Signature**.
+3. **Creating or Updating a User Session**.
+4. **Validating the Wallet Owner on Subsequent API Calls**.
+
+Here's a step-by-step guide for implementing the server-side logic:
+
+---
+
+### **Server-Side Changes**
+
+#### **1. Endpoint to Request a Message for Signing**
+This endpoint generates a unique message for the user to sign. The message should include:
+- A nonce for preventing replay attacks.
+- Optional metadata (e.g., app name, timestamp).
+
+**Endpoint**: `POST /auth/request-message`
+**Payload**:
+```json
+{
+  "walletAddress": "0xUserWalletAddress"
+}
 ```
 
-After running, you can access the Dify dashboard in your browser at [http://localhost/install](http://localhost/install) and start the initialization process.
+**Implementation**:
+```ts
+import { randomBytes } from 'crypto';
+const nonceStore: Record<string, string> = {}; // Temporary in-memory store for nonce
+export const requestMessage = async (req, res) => {
+  const { walletAddress } = req.body;
+  if (!walletAddress) {
+    return res.status(400).json({ error: "Wallet address is required" });
+  }
+  const nonce = randomBytes(16).toString('hex'); // Generate a unique nonce
+  nonceStore[walletAddress] = nonce;
+  const message = `Sign this message to authenticate. Nonce: ${nonce}`;
+  return res.json({ message });
+};
+```
 
-#### Seeking help
-Please refer to our [FAQ](https://docs.dify.ai/getting-started/install-self-hosted/faqs) if you encounter problems setting up Dify. Reach out to [the community and us](#community--contact) if you are still having issues.
+---
 
-> If you'd like to contribute to Dify or do additional development, refer to our [guide to deploying from source code](https://docs.dify.ai/getting-started/install-self-hosted/local-source-code)
+#### **2. Endpoint to Verify the Signed Message**
+This endpoint verifies the signed message using the provided wallet address and message.
 
-## Key features
-**1. Workflow**: 
-  Build and test powerful AI workflows on a visual canvas, leveraging all the following features and beyond.
+**Endpoint**: `POST /auth/verify-signature`
+**Payload**:
+```json
+{
+  "walletAddress": "0xUserWalletAddress",
+  "signature": "0xSignatureGeneratedByWallet"
+}
+```
 
+**Implementation**:
+```ts
+import { ethers } from 'ethers';
+export const verifySignature = async (req, res) => {
+  const { walletAddress, signature } = req.body;
+  if (!walletAddress || !signature) {
+    return res.status(400).json({ error: "Wallet address and signature are required" });
+  }
+  const nonce = nonceStore[walletAddress];
+  if (!nonce) {
+    return res.status(400).json({ error: "Invalid nonce or wallet address" });
+  }
+  const message = `Sign this message to authenticate. Nonce: ${nonce}`;
+  try {
+    // Recover the address from the signature
+    const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+    if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+      return res.status(401).json({ error: "Invalid signature" });
+    }
+    // Clear the nonce to prevent replay attacks
+    delete nonceStore[walletAddress];
+    // Create a session for the user (or generate a JWT)
+    const token = createSessionOrJWT(walletAddress);
+    return res.json({ success: true, token });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to verify signature" });
+  }
+};
+function createSessionOrJWT(walletAddress) {
+  // Generate a JWT or create a session in your backend
+  return "your_jwt_or_session_token"; // Replace with your session handling logic
+}
+```
 
-  https://github.com/langgenius/dify/assets/13230914/356df23e-1604-483d-80a6-9517ece318aa
+---
 
+#### **3. Middleware for Protecting Routes**
+Use the session or token to protect subsequent API calls.
 
+**Implementation**:
+```ts
+import jwt from 'jsonwebtoken';
+export const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const payload = jwt.verify(token, 'your-secret-key');
+    req.user = payload; // Attach user info to request
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+};
+```
 
-**2. Comprehensive model support**: 
-  Seamless integration with hundreds of proprietary / open-source LLMs from dozens of inference providers and self-hosted solutions, covering GPT, Mistral, Llama3, and any OpenAI API-compatible models. A full list of supported model providers can be found [here](https://docs.dify.ai/getting-started/readme/model-providers).
+---
 
-![providers-v5](https://github.com/langgenius/dify/assets/13230914/5a17bdbe-097a-4100-8363-40255b70f6e3)
+#### **4. Optional: Endpoint to Get User Info**
+Provide an endpoint for the client to fetch the authenticated user’s details.
 
+**Endpoint**: `GET /auth/me`
+**Implementation**:
+```ts
+export const getUserInfo = (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  return res.json({ walletAddress: req.user.walletAddress });
+};
+```
 
-**3. Prompt IDE**: 
-  Intuitive interface for crafting prompts, comparing model performance, and adding additional features such as text-to-speech to a chat-based app. 
+---
 
-**4. RAG Pipeline**: 
-  Extensive RAG capabilities that cover everything from document ingestion to retrieval, with out-of-box support for text extraction from PDFs, PPTs, and other common document formats.
+### **Workflow for Web3 Authentication**
 
-**5. Agent capabilities**: 
-  You can define agents based on LLM Function Calling or ReAct, and add pre-built or custom tools for the agent. Dify provides 50+ built-in tools for AI agents, such as Google Search, DALL·E, Stable Diffusion and WolframAlpha.
+1. **Request Signing Message**:
+   - Client sends `POST /auth/request-message` with the wallet address.
+   - Server generates and returns a unique message with a nonce.
 
-**6. LLMOps**: 
-  Monitor and analyze application logs and performance over time. You could continuously improve prompts, datasets, and models based on production data and annotations.
+2. **Sign and Verify**:
+   - Client signs the message using the wallet and sends it to `POST /auth/verify-signature`.
+   - Server verifies the signature, confirms ownership, and returns a session token.
 
-**7. Backend-as-a-Service**: 
-  All of Dify's offerings come with corresponding APIs, so you could effortlessly integrate Dify into your own business logic.
+3. **Authenticate API Calls**:
+   - Use the session token in headers (`Authorization: Bearer <token>`) for protected endpoints.
 
+---
 
-## Using Dify
+### **Security Considerations**
+- **Replay Attacks**: Ensure the nonce is used only once.
+- **Message Integrity**: Clearly define the message format to prevent signature forgery.
+- **Token Expiry**: If using JWTs, set a short expiration time.
 
-- **Cloud </br>**
-We host a [Dify Cloud](https://dify.ai) service for anyone to try with zero setup. It provides all the capabilities of the self-deployed version, and includes 200 free GPT-4 calls in the sandbox plan.
-
-- **Self-hosting Dify Community Edition</br>**
-Quickly get Dify running in your environment with this [starter guide](#quick-start).
-Use our [documentation](https://docs.dify.ai) for further references and more in-depth instructions.
-
-- **Dify for enterprise / organizations</br>**
-We provide additional enterprise-centric features. [Log your questions for us through this chatbot](https://udify.app/chat/22L1zSxg6yW1cWQg) or [send us an email](mailto:business@dify.ai?subject=[GitHub]Business%20License%20Inquiry) to discuss enterprise needs. </br>
-  > For startups and small businesses using AWS, check out [Dify Premium on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-t22mebxzwjhu6) and deploy it to your own AWS VPC with one-click. It's an affordable AMI offering with the option to create apps with custom logo and branding.
-
-
-## Staying ahead
-
-Star Dify on GitHub and be instantly notified of new releases.
-
-![star-us](https://github.com/langgenius/dify/assets/13230914/b823edc1-6388-4e25-ad45-2f6b187adbb4)
-
-
-## Advanced Setup
-
-If you need to customize the configuration, please refer to the comments in our [.env.example](docker/.env.example) file and update the corresponding values in your `.env` file. Additionally, you might need to make adjustments to the `docker-compose.yaml` file itself, such as changing image versions, port mappings, or volume mounts, based on your specific deployment environment and requirements. After making any changes, please re-run `docker-compose up -d`. You can find the full list of available environment variables [here](https://docs.dify.ai/getting-started/install-self-hosted/environments).
-
-If you'd like to configure a highly-available setup, there are community-contributed [Helm Charts](https://helm.sh/) and YAML files which allow Dify to be deployed on Kubernetes.
-
-- [Helm Chart by @LeoQuote](https://github.com/douban/charts/tree/master/charts/dify)
-- [Helm Chart by @BorisPolonsky](https://github.com/BorisPolonsky/dify-helm)
-- [YAML file by @Winson-030](https://github.com/Winson-030/dify-kubernetes)
-
-#### Using Terraform for Deployment
-
-Deploy Dify to Cloud Platform with a single click using [terraform](https://www.terraform.io/)
-
-##### Azure Global
-- [Azure Terraform by @nikawang](https://github.com/nikawang/dify-azure-terraform)
-
-##### Google Cloud
-- [Google Cloud Terraform by @sotazum](https://github.com/DeNA/dify-google-cloud-terraform)
-
-#### Using AWS CDK for Deployment
-
-Deploy Dify to AWS with [CDK](https://aws.amazon.com/cdk/)
-
-##### AWS 
-- [AWS CDK by @KevinZhao](https://github.com/aws-samples/solution-for-deploying-dify-on-aws)
-
-## Contributing
-
-For those who'd like to contribute code, see our [Contribution Guide](https://github.com/langgenius/dify/blob/main/CONTRIBUTING.md). 
-At the same time, please consider supporting Dify by sharing it on social media and at events and conferences.
-
-
-> We are looking for contributors to help with translating Dify to languages other than Mandarin or English. If you are interested in helping, please see the [i18n README](https://github.com/langgenius/dify/blob/main/web/i18n/README.md) for more information, and leave us a comment in the `global-users` channel of our [Discord Community Server](https://discord.gg/8Tpq4AcN9c).
-
-## Community & contact
-
-* [Github Discussion](https://github.com/langgenius/dify/discussions). Best for: sharing feedback and asking questions.
-* [GitHub Issues](https://github.com/langgenius/dify/issues). Best for: bugs you encounter using Dify.AI, and feature proposals. See our [Contribution Guide](https://github.com/langgenius/dify/blob/main/CONTRIBUTING.md).
-* [Discord](https://discord.gg/FngNHpbcY7). Best for: sharing your applications and hanging out with the community.
-* [X(Twitter)](https://twitter.com/dify_ai). Best for: sharing your applications and hanging out with the community.
-
-**Contributors**
-
-<a href="https://github.com/langgenius/dify/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=langgenius/dify" />
-</a>
-
-## Star history
-
-[![Star History Chart](https://api.star-history.com/svg?repos=langgenius/dify&type=Date)](https://star-history.com/#langgenius/dify&Date)
-
-
-## Security disclosure
-
-To protect your privacy, please avoid posting security issues on GitHub. Instead, send your questions to security@dify.ai and we will provide you with a more detailed answer.
-
-## License
-
-This repository is available under the [Dify Open Source License](LICENSE), which is essentially Apache 2.0 with a few additional restrictions.
-
+This setup will allow the server to securely handle RainbowKit-based Web3 authentication. Let me know if you need any part of this expanded!
