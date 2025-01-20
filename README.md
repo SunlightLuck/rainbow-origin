@@ -1,6 +1,6 @@
 We want to integrate RainbowKit in Difi as alternative auth. 
 
-Start the dify project locally from https://github.com/langgenius/dify
+Start the dify project locally from https://github.com/0xmonsblockmans/rainbow
 
 To add RainbowKit as an additional Web3 authentication option, we need to make several technical updates in the project. Below is a detailed step-by-step guide for the developer, including the changes required and where to make them.
 
