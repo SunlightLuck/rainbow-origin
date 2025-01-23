@@ -132,6 +132,10 @@ dmypy.json
 
 .DS_Store
 web/.vscode/settings.json
+web/.next
+
+auth-api/node_modules
+auth-api/.env
 
 # Intellij IDEA Files
 .idea/*
